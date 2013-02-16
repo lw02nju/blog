@@ -4,8 +4,12 @@
 AUTHOR = u'Lu Wen'
 SITENAME = u"Wen's home"
 SITEURL = u'http://www.luwen.info'
+#THEME = 'tuxlite_tbs'
 THEME = 'bootstrap2'
+DEFAULT_ORPHANS = 0
 DEFAULT_PAGINATION = 4
+WITH_PAGINATION = True
+DISQUS_SITENAME = u'luwen'
 
 TIMEZONE = 'Asia/Shanghai'
 
