@@ -22,7 +22,7 @@ Tags: Esper, Big Data, Java
 * always return "Object", null if there is none
 * it's transitive, the nested properies will all be dynamic if the ancestor is
 * operator: exists, cast, instanceof, typeof
-*Fragment and Fragment type(TODO)
+*Fragment and Fragment type(**TODO**)
 
 ###pojo event###
 * Configuration, if not standard java bean
@@ -71,7 +71,7 @@ Object[] propertyTypes = {int[].class, SalesPerson[].class, "OrderItem[]");
 
 ###Other concept###
 * Updating and merging events, (update istream, on-merge or on-update)
-* extract information from coarsed event: TODO(5.19)
+* extract information from coarsed event: **TODO*8(5.19)
 * `insert into` an event, the event must have setter methods, or relative construction methods, or a factory method through configuration
 
 ##Processing model##
@@ -88,4 +88,74 @@ Object[] propertyTypes = {int[].class, SalesPerson[].class, "OrderItem[]");
  * increase partitions for concurrency/lock optimization
  * use condition/pattern to dynamiclly identify specific circumstances
  * these can be shared by multiple statements
+* context exists when there is statements referencing it
+* context provides properties for use. Every statement will work on partitions independently.
 
+###Keyed Segmented Context###
+```java
+create context SegmentedByCustomer partition by custId from BankTxn
+create  context  SegmentedByCustomer  partition  by  custId  from  BankTxn,  account  from BankTxn 
+```
+* if context is from multiple streams, the keys must correspond to each other, like the same concept in different events(maybe different name)
+* can use filters to control events dlivered to context 
+* If using join, the join only occurs in the partition
+
+###Hash Segmented Context###
+```java
+create context SegmentedByCustomerHash
+    coalesce  by  consistent_hash_crc32(custId)  from  BankTxn  granularity  16
+preallocate
+```
+* hash method: crc32, java hash code, user provide
+* preallocate: use memory for time(if not preallocate, it needs dynamic check)
+* performance concerns for the granularity
+
+###Category Segmented Context###
+```java
+create context CategoryByTemp
+  group temp < 65 as cold,
+  group temp between 65 and 85 as normal,
+  group temp > 85 as large
+  from SensorEvent
+```
+
+###Non overlapping context###
+* non-overlapping context that exists once or that repeats in a regular fashion as controlled by start and end conditions. The number of context partitions is always either one or zero: Context partitions do not overlap
+* Once  the  start  condition  occurs,  the  engine  no  longer  observes  the  start  condition  and  begins observing  the  end  condition.  Once  the  end  condition  occurs,  the  engine  observes  the  start condition again
+* condition can be an event filter, a pattern, a crontab or a time period.
+```java
+create context NineToFive start (0, 9, *, *, *) end (0, 17, *, *, *)
+create context PowerOutage start PowerOutageEvent end pattern [PowerOnEvent -> timer:interval(5)]
+```
+
+###Overlapping context###
+* This context initiates a new context partition when an initiating condition occurs, and terminates one  or  more  context  partitions  when  the  terminating  condition  occurs
+```java
+create context CtxTrainEnter
+  initiated by TrainEnterEvent as te
+  terminated after 5 minutes
+```
+
+* Context nesting
+```java
+create context NineToFiveSegmented
+  context NineToFive start (0, 9, *, *, *) end (0, 17, *, *, *),
+  context SegmentedByCustomer partition by custId from BankTxn
+```
+Only initial context meets, there will be the subcontext
+* Partitioning Without Context Declaration
+ * grouped data window
+ * group aggration
+ * pattern
+ * match recognize
+ * join and subquery
+* output when terminate
+```java
+context CtxSample 
+select context.startevent.id, context.endevent.id, count(*) from MyEvent
+output snapshot when terminated
+```
+* context can be used to named window(**TODO**)
+* **TODO**
+  * Iterations on specific contexts
+  * on demand query to do on specific contexts
