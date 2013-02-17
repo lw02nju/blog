@@ -1,6 +1,6 @@
 Title: Markdown
 Date: 2013-2-12 21:38
-Category: site
+Category: tool
 Slug: site
 Author: Lu Wen
 Tags: note

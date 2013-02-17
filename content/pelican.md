@@ -1,6 +1,6 @@
 Title: Pelican usage
 Date: 2013-2-11 17:34
-Category: site
+Category: tool
 Slug: Pelican usage 
 Author: Lu Wen
 
