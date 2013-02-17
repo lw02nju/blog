@@ -3,11 +3,11 @@
 
 AUTHOR = u'Lu Wen'
 SITENAME = u"Wen's home"
-SITEURL = u'http://www.luwen.info'
+SITEURL = u'http://blog.luwen.info'
 #THEME = 'tuxlite_tbs'
 THEME = 'bootstrap2'
 DEFAULT_ORPHANS = 0
-DEFAULT_PAGINATION = 4
+DEFAULT_PAGINATION = 10
 WITH_PAGINATION = True
 DISQUS_SITENAME = u'luwen'
 
@@ -19,5 +19,3 @@ DEFAULT_LANG = u'en'
 LINKS =  (('Pelican', 'http://docs.notmyidea.org/alexis/pelican/'),
           ('Python.org', 'http://python.org'),
           ('Jinja2', 'http://jinja.pocoo.org'),)
-
-DEFAULT_PAGINATION = False
